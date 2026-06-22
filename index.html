@@ -90,6 +90,15 @@ button:hover {
   transform: scale(1.05);
 }
 
+/* Additional buttons (logout, back) styling for clarity */
+#logoutBtn, #backBtn {
+  background-color: #d32f2f; /* red for logout, dark for back */
+}
+
+#logoutBtn:hover, #backBtn:hover {
+  background-color: #b71c1c;
+}
+
 /* Header and section styles */
 h2 {
   margin-top: 30px;
@@ -166,7 +175,6 @@ form input, select {
   margin-top: 5px;
   border-radius: 5px;
   border: 1px solid #ccc;
-  box-sizing: border-box;
 }
 
 #exportBtn {
@@ -206,6 +214,12 @@ form input, select {
 <div id="container">
   <div id="dashboard">
     <h1>Gym Booking Dashboard</h1>
+
+    <!-- Buttons for Logout and Back -->
+    <div style="text-align:center; margin-bottom:10px;">
+      <button id="logoutBtn">Logout</button>
+      <button id="backBtn">Back</button>
+    </div>
 
     <!-- Stats -->
     <div class="dashboard">
@@ -282,183 +296,211 @@ form input, select {
     password: "password"
   };
 
-  // Get DOM elements
+  // DOM elements
   const loginOverlay = document.getElementById('loginOverlay');
   const loginForm = document.getElementById('loginForm');
   const dashboardDiv = document.getElementById('dashboard');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const backBtn = document.getElementById('backBtn');
 
   // Show login overlay initially
-  // Handle login
-  loginForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
+// Handle login
+loginForm.addEventListener('submit', function(e) {
+  e.preventDefault();
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
 
-    if (username === USER_CREDENTIALS.username && password === USER_CREDENTIALS.password) {
-      // Hide login overlay
-      loginOverlay.style.display = 'none';
-      // Show dashboard
-      dashboardDiv.style.display = 'block';
-    } else {
-      alert('Invalid credentials!');
-    }
+  if (username === USER_CREDENTIALS.username && password === USER_CREDENTIALS.password) {
+    // Hide login overlay
+    loginOverlay.style.display = 'none';
+    // Show dashboard
+    dashboardDiv.style.display = 'block';
+    // Save login state
+    localStorage.setItem('loggedIn', 'true');
+  } else {
+    alert('Invalid credentials!');
+  }
+});
+
+// Logout button
+document.getElementById('logoutBtn').addEventListener('click', function() {
+  // Show login overlay
+  loginOverlay.style.display = 'flex';
+  // Hide dashboard
+  dashboardDiv.style.display = 'none';
+  // Clear login state
+  localStorage.removeItem('loggedIn');
+});
+
+// Back button
+backBtn.addEventListener('click', function() {
+  // For simplicity, let's just alert or reload previous page/state
+  // or implement custom navigation if needed
+  // Here, we'll just alert for demonstration
+  alert('Back button clicked! Implement navigation as needed.');
+});
+
+// Load initial data
+let bookings = [];
+
+function loadInitialData() {
+  // Example dummy data
+  bookings = [
+    { name: "John", contact: "1234567890", trainingType: "Weightlifting", startTime: "09:00", endTime: "10:00" },
+    { name: "Alice", contact: "9876543210", trainingType: "Yoga", startTime: "10:30", endTime: "11:30" },
+    { name: "Bob", contact: "5555555555", trainingType: "Cardio", startTime: "12:00", endTime: "13:00" }
+  ];
+  // Load from local storage if exists
+  const stored = localStorage.getItem('bookings');
+  if (stored) {
+    bookings = JSON.parse(stored);
+  }
+}
+
+// Initialize
+loadInitialData();
+
+const totalBookingsElem = document.getElementById('totalBookings');
+const trainingTypesElem = document.getElementById('trainingTypes');
+const bookedSlotsElem = document.getElementById('bookedSlots');
+
+const tbody = document.querySelector('#bookingTable tbody');
+
+function updateDashboard() {
+  totalBookingsElem.textContent = bookings.length;
+
+  const typesCount = {};
+  bookings.forEach(b => {
+    typesCount[b.trainingType] = (typesCount[b.trainingType] || 0) + 1;
   });
-
-  // Load initial data
-  let bookings = [];
-
-  function loadInitialData() {
-    // Example dummy data
-    bookings = [
-      { name: "John", contact: "1234567890", trainingType: "Weightlifting", startTime: "09:00", endTime: "10:00" },
-      { name: "Alice", contact: "9876543210", trainingType: "Yoga", startTime: "10:30", endTime: "11:30" },
-      { name: "Bob", contact: "5555555555", trainingType: "Cardio", startTime: "12:00", endTime: "13:00" }
-    ];
-    // Load from local storage if exists
-    const stored = localStorage.getItem('bookings');
-    if (stored) {
-      bookings = JSON.parse(stored);
-    }
+  trainingTypesElem.innerHTML = '';
+  for (const [type, count] of Object.entries(typesCount)) {
+    const li = document.createElement('li');
+    li.textContent = `${type}: ${count}`;
+    trainingTypesElem.appendChild(li);
   }
 
-  loadInitialData();
-
-  const totalBookingsElem = document.getElementById('totalBookings');
-  const trainingTypesElem = document.getElementById('trainingTypes');
-  const bookedSlotsElem = document.getElementById('bookedSlots');
-
-  const tbody = document.querySelector('#bookingTable tbody');
-
-  function updateDashboard() {
-    // Total bookings
-    totalBookingsElem.textContent = bookings.length;
-
-    // Training types
-    const typesCount = {};
-    bookings.forEach(b => {
-      typesCount[b.trainingType] = (typesCount[b.trainingType] || 0) + 1;
-    });
-    trainingTypesElem.innerHTML = '';
-    for (const [type, count] of Object.entries(typesCount)) {
-      const li = document.createElement('li');
-      li.textContent = `${type}: ${count}`;
-      trainingTypesElem.appendChild(li);
-    }
-
-    // Booked slots
-    bookedSlotsElem.innerHTML = '';
-    bookings.forEach(b => {
-      const li = document.createElement('li');
-      li.textContent = `${b.startTime} - ${b.endTime} (${b.trainingType})`;
-      bookedSlotsElem.appendChild(li);
-    });
-  }
-
-  function renderBookings() {
-    tbody.innerHTML = '';
-    bookings.forEach(b => {
-      const isBooked = !isSlotAvailable(b.startTime, b.endTime, b);
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${b.name}</td>
-        <td>${b.contact}</td>
-        <td>${b.trainingType}</td>
-        <td>${b.startTime}</td>
-        <td>${b.endTime}</td>
-        <td style="color: ${isBooked ? 'red' : 'green'};">${isBooked ? 'Already Booked' : 'Available'}</td>
-      `;
-      tbody.appendChild(row);
-    });
-  }
-
-  function isSlotAvailable(startTime, endTime, excludeBooking = null) {
-    for (let b of bookings) {
-      if (excludeBooking && b === excludeBooking) continue;
-      if (
-        (startTime >= b.startTime && startTime < b.endTime) ||
-        (endTime > b.startTime && endTime <= b.endTime) ||
-        (startTime <= b.startTime && endTime >= b.endTime)
-      ) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  // Handle booking form
- document.getElementById('bookingForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const name = document.getElementById('name').value.trim();
-    const contact = document.getElementById('contact').value.trim();
-    const trainingType = document.getElementById('trainingType').value;
-    const startTime = document.getElementById('startTime').value;
-    const endTime = document.getElementById('endTime').value;
-
-    if (startTime >= endTime) {
-      document.getElementById('statusMessage').textContent = 'End time must be after start time.';
-      return;
-    }
-
-    if (isSlotAvailable(startTime, endTime)) {
-      const newBooking = { name, contact, trainingType, startTime, endTime };
-      bookings.push(newBooking);
-      localStorage.setItem('bookings', JSON.stringify(bookings));
-      renderBookings();
-      updateDashboard();
-      document.getElementById('statusMessage').textContent = 'Slot booked successfully!';
-      document.getElementById('bookingForm').reset();
-    } else {
-      document.getElementById('statusMessage').textContent = 'Selected slot is already booked.';
-    }
+  bookedSlotsElem.innerHTML = '';
+  bookings.forEach(b => {
+    const li = document.createElement('li');
+    li.textContent = `${b.startTime} - ${b.endTime} (${b.trainingType})`;
+    bookedSlotsElem.appendChild(li);
   });
+}
 
-  // Load CSV data
- document.getElementById('loadDataBtn').addEventListener('click', function() {
-    const fileInput = document.getElementById('csvFileInput');
-    const file = fileInput.files[0];
-    if (!file) {
-      alert('Please select a CSV file.');
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const content = e.target.result;
-      parseCSV(content);
-      localStorage.setItem('bookings', JSON.stringify(bookings));
-      renderBookings();
-      updateDashboard();
-    };
-    reader.readAsText(file);
+function renderBookings() {
+  tbody.innerHTML = '';
+  bookings.forEach(b => {
+    const isBooked = !isSlotAvailable(b.startTime, b.endTime, b);
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${b.name}</td>
+      <td>${b.contact}</td>
+      <td>${b.trainingType}</td>
+      <td>${b.startTime}</td>
+      <td>${b.endTime}</td>
+      <td style="color: ${isBooked ? 'red' : 'green'};">${isBooked ? 'Already Booked' : 'Available'}</td>
+    `;
+    tbody.appendChild(row);
   });
+}
 
-  function parseCSV(content) {
-    const lines = content.trim().split('\n');
-    bookings = [];
-    for (let i = 1; i < lines.length; i++) {
-      const [name, contact, trainingType, startTime, endTime] = lines[i].split(',');
-      bookings.push({ name, contact, trainingType, startTime, endTime });
+function isSlotAvailable(startTime, endTime, excludeBooking = null) {
+  for (let b of bookings) {
+    if (excludeBooking && b === excludeBooking) continue;
+    if (
+      (startTime >= b.startTime && startTime < b.endTime) ||
+      (endTime > b.startTime && endTime <= b.endTime) ||
+      (startTime <= b.startTime && endTime >= b.endTime)
+    ) {
+      return false;
     }
   }
+  return true;
+}
 
-  // Export bookings
- document.getElementById('exportBtn').addEventListener('click', function() {
-    let csvContent = 'Name,Contact,TrainingType,StartTime,EndTime\n';
-    bookings.forEach(b => {
-      csvContent += `${b.name},${b.contact},${b.trainingType},${b.startTime},${b.endTime}\n`;
-    });
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'bookings_export.csv';
-    a.click();
-    URL.revokeObjectURL(url);
+// Booking form handler
+document.getElementById('bookingForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const name = document.getElementById('name').value.trim();
+  const contact = document.getElementById('contact').value.trim();
+  const trainingType = document.getElementById('trainingType').value;
+  const startTime = document.getElementById('startTime').value;
+  const endTime = document.getElementById('endTime').value;
+
+  if (startTime >= endTime) {
+    document.getElementById('statusMessage').textContent = 'End time must be after start time.';
+    return;
+  }
+
+  if (isSlotAvailable(startTime, endTime)) {
+    const newBooking = { name, contact, trainingType, startTime, endTime };
+    bookings.push(newBooking);
+    localStorage.setItem('bookings', JSON.stringify(bookings));
+    renderBookings();
+    updateDashboard();
+    document.getElementById('statusMessage').textContent = 'Slot booked successfully!';
+    document.getElementById('bookingForm').reset();
+  } else {
+    document.getElementById('statusMessage').textContent = 'Selected slot is already booked.';
+  }
+});
+
+// CSV import
+document.getElementById('loadDataBtn').addEventListener('click', function() {
+  const fileInput = document.getElementById('csvFileInput');
+  const file = fileInput.files[0];
+  if (!file) {
+    alert('Please select a CSV file.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const content = e.target.result;
+    parseCSV(content);
+    localStorage.setItem('bookings', JSON.stringify(bookings));
+    renderBookings();
+    updateDashboard();
+  };
+  reader.readAsText(file);
+});
+
+function parseCSV(content) {
+  const lines = content.trim().split('\n');
+  bookings = [];
+  for (let i = 1; i < lines.length; i++) {
+    const [name, contact, trainingType, startTime, endTime] = lines[i].split(',');
+    bookings.push({ name, contact, trainingType, startTime, endTime });
+  }
+}
+
+// Export data
+document.getElementById('exportBtn').addEventListener('click', function() {
+  let csvContent = 'Name,Contact,TrainingType,StartTime,EndTime\n';
+  bookings.forEach(b => {
+    csvContent += `${b.name},${b.contact},${b.trainingType},${b.startTime},${b.endTime}\n`;
   });
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'bookings_export.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+});
 
-  // Initialize dashboard
-  updateDashboard();
-  renderBookings();
+// Initialize dashboard
+updateDashboard();
+renderBookings();
 
+// Optional: Check login state on page load
+if (localStorage.getItem('loggedIn') === 'true') {
+  loginOverlay.style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+} else {
+  loginOverlay.style.display = 'flex';
+  document.getElementById('dashboard').style.display = 'none';
+}
 </script>
 
 </body>
