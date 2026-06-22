@@ -4,153 +4,309 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Gym Booking Dashboard</title>
+<!-- Google Fonts for better typography -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
+
 <style>
   body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    font-family: 'Roboto', sans-serif;
     margin: 0;
-    padding: 20px;
+    padding: 0;
+    background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+    color: #333;
   }
 
-  h1 {
-    text-align: center;
-  }
+  /* Container for login or dashboard */
+#container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+}
 
-  .dashboard {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 20px;
-  }
+/* Login overlay styling */
+#loginOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  animation: fadeIn 1s ease;
+}
 
-  .card {
-    background: #fff;
-    padding: 15px;
-    border-radius: 8px;
-    width: 30%;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  }
+#loginBox {
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  width: 300px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+  text-align: center;
+  animation: slideDown 0.5s ease;
+}
 
-  .card h2 {
-    margin-top: 0;
-  }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-  }
+@keyframes slideDown {
+  from { transform: translateY(-50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
 
-  th, td {
-    border: 1px solid #ccc;
-    padding: 8px;
-    text-align: center;
-  }
+/* Dashboard styles */
+#dashboard {
+  display: none; /* Hidden initially, shown after login */
+  animation: fadeIn 1s ease;
+}
 
-  th {
-    background-color: #eee;
-  }
+/* Header styles */
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #fff;
+  text-shadow: 2px 2px 4px #000;
+}
 
-  input[type="file"] {
-    margin-top: 10px;
-  }
+/* Buttons */
+button {
+  background-color: #0288D1;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  margin: 10px 0;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s, transform 0.2s;
+}
 
-  button {
-    padding: 10px 20px;
-    margin-top: 10px;
-    background-color: #0288D1;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
+button:hover {
+  background-color: #0277BD;
+  transform: scale(1.05);
+}
 
-  button:hover {
-    background-color: #0277BD;
-  }
+/* Header and section styles */
+h2 {
+  margin-top: 30px;
+  color: #fff;
+  text-shadow: 1px 1px 3px #000;
+}
 
-  #exportBtn {
-    background-color: #388E3C;
-  }
+/* Dashboard cards */
+.dashboard {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  margin-top: 20px;
+}
 
-  #exportBtn:hover {
-    background-color: #2E7D32;
-  }
+.card {
+  background: rgba(255,255,255,0.9);
+  padding: 20px;
+  border-radius: 10px;
+  width: 30%;
+  min-width: 250px;
+  margin: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  transition: transform 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+th {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+/* Form styles */
+form {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  max-width: 600px;
+  margin: auto;
+  margin-top: 20px;
+  animation: fadeIn 1s ease;
+}
+
+form label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+form input, select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+#exportBtn {
+  display: block;
+  margin: 20px auto;
+  background-color: #388E3C;
+}
+
+#exportBtn:hover {
+  background-color: #2E7D32;
+}
+
+/* Animations for various elements */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 </style>
 </head>
 <body>
 
-<h1>Gym Booking Dashboard</h1>
-
-<!-- Import Data -->
-<div style="text-align:center; margin-top:20px;">
-  <h3>Import Booking Data (CSV Format)</h3>
-  <input type="file" id="csvFileInput" accept=".csv" />
-  <button id="loadDataBtn">Load Data</button>
-</div>
-
-<!-- Dashboard Stats -->
-<div class="dashboard">
-  <div class="card">
-    <h2>Total Bookings</h2>
-    <p id="totalBookings">0</p>
-  </div>
-  <div class="card">
-    <h2>Training Types</h2>
-    <ul id="trainingTypes"></ul>
-  </div>
-  <div class="card">
-    <h2>Booked Slots</h2>
-    <ul id="bookedSlots"></ul>
+<!-- Login Overlay -->
+<div id="loginOverlay">
+  <div id="loginBox">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <label for="username">Username:</label>
+      <input type="text" id="username" required />
+      <label for="password">Password:</label>
+      <input type="password" id="password" required />
+      <button type="submit">Login</button>
+    </form>
   </div>
 </div>
 
-<!-- Book a Slot -->
-<div style="margin-top:30px;">
-  <h2>Book a Slot</h2>
-  <form id="bookingForm">
-    <label>Name:</label>
-    <input type="text" id="name" required /><br/>
-    <label>Contact:</label>
-    <input type="text" id="contact" required /><br/>
-    <label>Training Type:</label>
-    <select id="trainingType" required>
-      <option value="Weightlifting">Weightlifting</option>
-      <option value="Cardio">Cardio</option>
-      <option value="Yoga">Yoga</option>
-      <option value="Crossfit">Crossfit</option>
-    </select><br/>
-    <label>Start Time:</label>
-    <input type="time" id="startTime" required /><br/>
-    <label>End Time:</label>
-    <input type="time" id="endTime" required /><br/>
-    <button type="submit">Book Slot</button>
-  </form>
-  <div class="status" id="statusMessage"></div>
+<!-- Main Dashboard Container -->
+<div id="container">
+  <div id="dashboard">
+    <h1>Gym Booking Dashboard</h1>
+
+    <!-- Stats -->
+    <div class="dashboard">
+      <div class="card">
+        <h2>Total Bookings</h2>
+        <p id="totalBookings">0</p>
+      </div>
+      <div class="card">
+        <h2>Training Types</h2>
+        <ul id="trainingTypes"></ul>
+      </div>
+      <div class="card">
+        <h2>Booked Slots</h2>
+        <ul id="bookedSlots"></ul>
+      </div>
+    </div>
+
+    <!-- Import CSV Data -->
+    <div style="text-align:center; margin-top:20px;">
+      <h3>Import Booking Data (CSV Format)</h3>
+      <input type="file" id="csvFileInput" accept=".csv" />
+      <button id="loadDataBtn">Load Data</button>
+    </div>
+
+    <!-- Book a Slot -->
+    <div style="margin-top:30px;">
+      <h2>Book a Slot</h2>
+      <form id="bookingForm">
+        <label>Name:</label>
+        <input type="text" id="name" required />
+        <label>Contact:</label>
+        <input type="text" id="contact" required />
+        <label>Training Type:</label>
+        <select id="trainingType" required>
+          <option value="Weightlifting">Weightlifting</option>
+          <option value="Cardio">Cardio</option>
+          <option value="Yoga">Yoga</option>
+          <option value="Crossfit">Crossfit</option>
+        </select>
+        <label>Start Time:</label>
+        <input type="time" id="startTime" required />
+        <label>End Time:</label>
+        <input type="time" id="endTime" required />
+        <button type="submit">Book Slot</button>
+      </form>
+      <div class="status" id="statusMessage"></div>
+    </div>
+
+    <!-- Existing Bookings -->
+    <h2>Existing Bookings</h2>
+    <table id="bookingTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Contact</th>
+          <th>Training Type</th>
+          <th>Start Time</th>
+          <th>End Time</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <!-- Export Button -->
+    <button id="exportBtn">Export Bookings</button>
+  </div>
 </div>
-
-<!-- Existing Bookings Table -->
-<h2>Existing Bookings</h2>
-<table id="bookingTable">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Contact</th>
-      <th>Training Type</th>
-      <th>Start Time</th>
-      <th>End Time</th>
-      <th>Status</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
-
-<!-- Export Button -->
-<button id="exportBtn">Export Bookings</button>
 
 <script>
+  // User credentials for login
+  const USER_CREDENTIALS = {
+    username: "admin",
+    password: "password"
+  };
+
+  // Get DOM elements
+  const loginOverlay = document.getElementById('loginOverlay');
+  const loginForm = document.getElementById('loginForm');
+  const dashboardDiv = document.getElementById('dashboard');
+
+  // Show login overlay initially
+  // Handle login
+  loginForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    if (username === USER_CREDENTIALS.username && password === USER_CREDENTIALS.password) {
+      // Hide login overlay
+      loginOverlay.style.display = 'none';
+      // Show dashboard
+      dashboardDiv.style.display = 'block';
+    } else {
+      alert('Invalid credentials!');
+    }
+  });
+
+  // Load initial data
   let bookings = [];
 
-  // Load dummy data or from local storage
   function loadInitialData() {
     // Example dummy data
     bookings = [
@@ -201,9 +357,8 @@
   function renderBookings() {
     tbody.innerHTML = '';
     bookings.forEach(b => {
-      const row = document.createElement('tr');
-      // Check if slot is already booked
       const isBooked = !isSlotAvailable(b.startTime, b.endTime, b);
+      const row = document.createElement('tr');
       row.innerHTML = `
         <td>${b.name}</td>
         <td>${b.contact}</td>
@@ -216,7 +371,6 @@
     });
   }
 
-  // Check if a slot overlaps with existing bookings
   function isSlotAvailable(startTime, endTime, excludeBooking = null) {
     for (let b of bookings) {
       if (excludeBooking && b === excludeBooking) continue;
@@ -258,7 +412,7 @@
     }
   });
 
-  // Load data from CSV file
+  // Load CSV data
  document.getElementById('loadDataBtn').addEventListener('click', function() {
     const fileInput = document.getElementById('csvFileInput');
     const file = fileInput.files[0];
@@ -277,17 +431,16 @@
     reader.readAsText(file);
   });
 
-  // Parse CSV content
- function parseCSV(content) {
+  function parseCSV(content) {
     const lines = content.trim().split('\n');
     bookings = [];
-    for (let i = 1; i < lines.length; i++) { // skip header
+    for (let i = 1; i < lines.length; i++) {
       const [name, contact, trainingType, startTime, endTime] = lines[i].split(',');
       bookings.push({ name, contact, trainingType, startTime, endTime });
     }
   }
 
-  // Export bookings to CSV
+  // Export bookings
  document.getElementById('exportBtn').addEventListener('click', function() {
     let csvContent = 'Name,Contact,TrainingType,StartTime,EndTime\n';
     bookings.forEach(b => {
@@ -302,7 +455,7 @@
     URL.revokeObjectURL(url);
   });
 
-  // Initial rendering
+  // Initialize dashboard
   updateDashboard();
   renderBookings();
 
